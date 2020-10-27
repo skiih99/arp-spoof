@@ -116,17 +116,18 @@ void send_arp_pkt(char* destip, char* destmac, char* srcip, char* srcmac, pcap_t
 	}
 }
 
-int check_packet(char* ip, uint8_t* new_ip) {
-    int checkflag = 1;
+bool check_packet(char* ip, uint8_t* new_ip) {
+    bool checkflag = true;
     uint8_t conv_ip[4];
+    int tmp[4];
     int i;
 
-    sscanf(ip, "%u.%u.%u.%u", &conv_ip[0], &conv_ip[1], &conv_ip[2], &conv_ip[3]);
-    for(i = 0; i < 4; i++) printf("%d ", conv_ip[i]);
+    sscanf(ip, "%u.%u.%u.%u", &tmp[0], &tmp[1], &tmp[2], &tmp[3]);
+    for(i = 0; i < 4; i++) conv_ip[i] = (uint8_t)tmp[i];
 
     for(i = 0; i < 4; i++) {
         if (conv_ip[i] != new_ip[i]) {
-            checkflag = 0;
+            checkflag = false;
             break;
         }
     }

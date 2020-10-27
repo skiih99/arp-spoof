@@ -20,7 +20,7 @@ void get_attacker_ip(char* ipaddr,  char* dev);
 void get_attacker_mac(char* macaddr, char* dev);
 void get_host_mac(char* senderip, char* sendermac, char* attip, char* attmac, pcap_t* handle);
 void send_arp_pkt(char* destip, char* destmac, char* srcip, char* srcmac, pcap_t* handle, int opcode);
-int check_packet(char* ip, uint8_t* new_ip);
+bool check_packet(char* ip, uint8_t* new_ip);
 
 #pragma pack(push, 1)
 struct EthHdr final {
