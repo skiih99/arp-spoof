@@ -73,7 +73,6 @@ int main(int argc, char* argv[]) {
         }
         else {
             if((rcv_packet[12] == 0x08) && (rcv_packet[13] == 0x00)) {
-                uint8_t current_dest_ip[4];
                 uint8_t current_src_ip[4];
                
                 for(i = 0; i < 4; i++) current_src_ip[i] = rcv_packet[26+i];
