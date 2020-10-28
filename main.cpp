@@ -95,12 +95,11 @@ int main(int argc, char* argv[]) {
                     rcv_packet[i] = dest_mac[i];
                     rcv_packet[6+i] = attack_mac_conv[i];
                 }
-                int iphdr_len = ntohs((uint16_t)rcv_packet[16]);
-                int res2 = pcap_sendpacket(handle, rcv_packet, iphdr_len + Ethhdr_Len);
+                int ippkt_len = ntohs(*((uint16_t*)(rcv_packet + 16)));
+                int res2 = pcap_sendpacket(handle, (const u_char*)rcv_packet, ippkt_len + Ethhdr_Len + 4);
                 if (res2 != 0) {
                     fprintf(stderr, "Send IP packet error!\n");
                 }
-                break;
             }
         }
     }
